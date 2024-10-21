@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signup</title>
+    <script type="module">
+        // Import Firebase SDK
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
+        import { getAuth, createUserWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBZu0ytJjU2I9Y2aTrfChVNcdtLIRnjxWU",
+            authDomain: "file-system-e1815.firebaseapp.com",
+            projectId: "file-system-e1815",
+            storageBucket: "file-system-e1815.appspot.com",
+            messagingSenderId: "924787673289",
+            appId: "1:924787673289:web:25cd090343274d2b676518",
+            measurementId: "G-YP4BDV1XQR"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // Signup functionality
+        window.signup = function() {
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+
+            createUserWithEmailAndPassword(auth, email, password)
+                .then((userCredential) => {
+                    // Successfully signed up
+                    alert('Signup successful!');
+                    // Optionally, redirect to index.html or another page
+                    window.location.href = 'index.html';
+                })
+                .catch((error) => {
+                    // Handle Errors here.
+                    const errorCode = error.code;
+                    const errorMessage = error.message;
+                    alert(`Error: ${errorMessage}`);
+                });
+        };
+    </script>
+</head>
+<body>
+    <h1>Signup</h1>
+    <input type="email" id="signupEmail" placeholder="Email" required>
+    <input type="password" id="signupPassword" placeholder="Password" required>
+    <button onclick="signup()">Signup</button>
+</body>
+</html>

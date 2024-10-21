@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File System</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.5/xlsx.full.min.js"></script>
+    <script type="module">
+        // Import Firebase SDK
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
+        import { getAuth, signOut } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBZu0ytJjU2I9Y2aTrfChVNcdtLIRnjxWU",
+            authDomain: "file-system-e1815.firebaseapp.com",
+            projectId: "file-system-e1815",
+            storageBucket: "file-system-e1815.appspot.com",
+            messagingSenderId: "924787673289",
+            appId: "1:924787673289:web:25cd090343274d2b676518",
+            measurementId: "G-YP4BDV1XQR"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // Check authentication status on page load
+        window.onload = function() {
+            auth.onAuthStateChanged(user => {
+                if (user) {
+                    // User is signed in, redirect to index.html
+                    if (window.location.pathname !== '/index.html') {
+                        window.location.href = 'index.html'; 
+                    }
+                } else {
+                    // User is signed out, stay on login or signup pages
+                    if (window.location.pathname === '/index.html') {
+                        window.location.href = 'login.html'; // Redirect to login if not authenticated
+                    }
+                }
+            });
+        };
+
+        // Logout functionality
+        window.logout = function() {
+            signOut(auth).then(() => {
+                // Sign-out successful.
+                alert('Logged out successfully!');
+                window.location.href = 'login.html'; // Redirect to login page after logout
+            }).catch((error) => {
+                // An error happened.
+                alert('Logout failed: ' + error.message);
+            });
+        };
+    </script>
+    <script type="module" src="script.js" defer></script>
+</head>
+<body>
+    <header>
+        <img src="logo.png" alt="Logo" class="logo"> 
+        <h1>File System</h1>
+        <button id="logoutBtn" onclick="logout()">Logout</button> <!-- Logout button -->
+    </header>
+    
+    <form id="fileSystemForm">
+        <input type="text" id="accountNumber" placeholder="Account Number" required>
+        <input type="text" id="description1" placeholder="Description 1" required>
+        <input type="text" id="description2" placeholder="Description 2" required>
+        <input type="text" id="description3" placeholder="Description 3" required>
+        <input type="text" id="description4" placeholder="Description 4" required>
+        <input type="date" id="transactionDate" required>
+        <input type="file" id="files" multiple>
+        <button type="submit">Add Entry</button>
+    </form>
+
+    <input type="text" id="searchInput" placeholder="Search..." oninput="searchFunction()">
+
+    <table id="dataTable">
+        <thead>
+            <tr>
+                <th>No.</th>
+                <th>Account Number</th>
+                <th>Description 1</th>
+                <th>Description 2</th>
+                <th>Description 3</th>
+                <th>Description 4</th>
+                <th>Transaction Date</th>
+                <th>Files</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- New entries will be inserted here -->
+        </tbody>
+    </table>
+
+    <button onclick="downloadExcel()">Download Excel</button>
+
+    <script>
+        document.getElementById('fileSystemForm').addEventListener('submit', function(e) {
+            e.preventDefault(); // Prevent the form from submitting normally
+
+            // Get form data
+            const accountNumber = document.getElementById('accountNumber').value;
+            const description1 = document.getElementById('description1').value;
+            const description2 = document.getElementById('description2').value;
+            const description3 = document.getElementById('description3').value;
+            const description4 = document.getElementById('description4').value;
+            const transactionDate = document.getElementById('transactionDate').value;
+            const files = document.getElementById('files').files;
+
+            // Add the data to the table
+            const table = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
+            const newRow = table.insertRow(-1); // Add a new row at the end
+
+            // Number the rows automatically
+            const rowNumber = table.rows.length; // The new row's number
+
+            let filesHTML = '';
+            for (let i = 0; i < files.length; i++) {
+                const fileURL = URL.createObjectURL(files[i]);
+                filesHTML += `<a href="${fileURL}" download="${files[i].name}">${files[i].name}</a><br>`;
+            }
+
+            newRow.innerHTML = 
+                `<td>${rowNumber}</td>
+                <td>${accountNumber}</td>
+                <td>${description1}</td>
+                <td>${description2}</td>
+                <td>${description3}</td>
+                <td>${description4}</td>
+                <td>${transactionDate}</td>
+                <td>${filesHTML}</td>`;
+
+            // Reset the form for new entries
+            this.reset();
+        });
+
+        // Search function
+        function searchFunction() {
+            const input = document.getElementById('searchInput').value.toLowerCase();
+            const table = document.getElementById('dataTable');
+            const rows = table.getElementsByTagName('tr');
+
+            // Loop through all table rows, except the first (header row)
+            for (let i = 1; i < rows.length; i++) {
+                const cells = rows[i].getElementsByTagName('td');
+                let match = false;
+
+                // Loop through all cells in the current row
+                for (let j = 0; j < cells.length; j++) {
+                    if (cells[j].textContent.toLowerCase().includes(input)) {
+                        match = true;
+                        break;
+                    }
+                }
+
+                // Show/hide the row based on the search
+                rows[i].style.display = match ? '' : 'none';
+            }
+        }
+
+        // Function to download the table as Excel
+        function downloadExcel() {
+            const table = document.getElementById('dataTable');
+            const wb = XLSX.utils.table_to_book(table, { sheet: "Sheet1" });
+            XLSX.writeFile(wb, "file_system_data.xlsx");
+        }
+    </script>
+</body>
+</html>
+
